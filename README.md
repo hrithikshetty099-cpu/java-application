@@ -1,55 +1,50 @@
 # Daily Sales Management and GST Billing System
 
-A Java 17, Spring Boot, Thymeleaf and MySQL application for managing products, customers, stock, GST invoices and sales reports.
+A Java 17, Spring Boot, Thymeleaf and Supabase PostgreSQL application for managing products, customers, stock, GST invoices and sales reports.
 
 ## Requirements
 
 - JDK 17
 - Maven 3.8+
-- MySQL 8+
+- A Supabase project with its PostgreSQL database enabled
 - VS Code with the Extension Pack for Java (recommended)
 
-## 1. Configure MySQL
+## 1. Configure Supabase PostgreSQL
 
-Start MySQL and create the application database and a dedicated account (or use an existing local development account):
+In the Supabase dashboard, open **Project Settings → Database** and obtain the PostgreSQL connection details. Use the direct connection or the Supavisor session pooler; use the host, port, database name, and username Supabase provides. The connection URL must use the PostgreSQL JDBC format and require SSL, for example:
 
-```sql
-CREATE DATABASE daily_sales_gst CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'sales_app'@'localhost' IDENTIFIED BY 'Choose-A-Strong-Password';
-GRANT ALL PRIVILEGES ON daily_sales_gst.* TO 'sales_app'@'localhost';
-FLUSH PRIVILEGES;
+```text
+jdbc:postgresql://<supabase-host>:5432/postgres?sslmode=require
 ```
 
-The default JDBC URL points to `localhost:3306/daily_sales_gst`. Hibernate creates/updates the tables on application startup from the JPA entities. The relational SQL reference is in `src/main/resources/schema.sql`.
+Hibernate creates or updates the application's tables on startup from the existing JPA entities. The PostgreSQL relational SQL reference is in `src/main/resources/schema.sql`. `ddl-auto=update` is non-destructive, but it does not migrate records from a previous MySQL database; back up and migrate any existing records separately before switching production data sources.
 
-Configure credentials in PowerShell before starting the application (these values last only for the current terminal):
+Set the connection values as environment variables in PowerShell before starting the application (these values last only for the current terminal). Do not commit credentials or post them in chat:
 
 ```powershell
-$env:DB_USERNAME = "sales_app"
-$env:DB_PASSWORD = "Choose-A-Strong-Password"
+$env:DB_URL = "jdbc:postgresql://<supabase-host>:5432/postgres?sslmode=require"
+$env:DB_USERNAME = "<supabase-database-username>"
+$env:DB_PASSWORD = "<supabase-database-password>"
 $env:ADMIN_USERNAME = "admin"
-$env:ADMIN_PASSWORD = "Use-A-Unique-Admin-Password"
-mvn spring-boot:run
+$env:ADMIN_PASSWORD = "<choose-a-unique-admin-password>"
 ```
 
-Alternatively, update `DB_URL`, `DB_USERNAME` and `DB_PASSWORD` in the VS Code launch configuration or environment. Do not commit real credentials. On the first startup, an admin user is created using `ADMIN_USERNAME` and `ADMIN_PASSWORD`; the password is stored as a BCrypt hash. The default credentials (`admin` / `ChangeMe123!`) are for local evaluation only—override them before use. Changing these variables later does not reset an already-created admin account.
+The application requires all three database variables; it has no local database or password fallback. PostgreSQL TLS is required by the datasource configuration. On the first startup, an admin user is created using `ADMIN_USERNAME` and `ADMIN_PASSWORD`; the password is stored as a BCrypt hash. Changing these variables later does not reset an already-created admin account.
 
 The first startup also inserts a few sample products and customers when their respective tables are empty.
 
-## 2. Run in VS Code
+## 2. Build and run
 
-1. Open this folder in VS Code and install **Extension Pack for Java**.
-2. Ensure VS Code uses JDK 17 (`Java: Configure Java Runtime`).
-3. Configure the MySQL environment variables above in the integrated terminal.
-4. Run `mvn spring-boot:run`, or open `SalesManagementApplication.java` and choose **Run**.
-5. Visit [http://localhost:8080](http://localhost:8080) and sign in with the configured admin credentials.
-
-Build and run the focused billing tests:
+From the project directory, in the same PowerShell terminal where the environment variables were set:
 
 ```powershell
-mvn test
-mvn package
+mvn clean install
+mvn spring-boot:run
 ```
+
+Maven runs the tests as part of `clean install`. Successful application startup confirms it connected to the configured database. If startup fails, check the exception for a missing environment variable, invalid Supabase host/port/database/user/password, or network access restrictions in Supabase. Never disable SSL to work around a connection error.
+
+Visit [http://localhost:8080](http://localhost:8080) and sign in with the configured admin credentials. In VS Code, select JDK 17 using **Java: Configure Java Runtime** before running the same Maven commands in the integrated terminal.
 
 ## Features and manual acceptance checklist
 
