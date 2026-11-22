@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Products · DailySales</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<th:block th:replace="~{layout :: layout('Products & inventory', 'products', ~{::section})}">
+<section>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div><div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <div class="welcome-row"><p class="muted">Manage your catalog, pricing, GST rates and stock levels.</p><a class="button button-primary" th:href="@{/products/new}">＋ Add product</a></div>
+    <div th:if="${!#lists.isEmpty(lowStock)}" class="alert alert-warning"><strong>Low stock:</strong> <span th:each="p,iter : ${lowStock}"><span th:text="${p.name + ' (' + p.stock + ' left)'}"></span><span th:if="${!iter.last}"> · </span></span></div>
+    <section class="panel table-panel"><div class="panel-heading"><div><h2>Product catalog</h2><p class="muted" th:text="${#lists.size(products) + ' products'}">0 products</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th>PRODUCT</th><th>SKU</th><th>PRICE</th><th>GST RATE</th><th>AVAILABLE STOCK</th><th></th></tr></thead><tbody>
+        <tr th:each="p : ${products}"><td><div class="table-product"><span class="product-avatar" th:text="${#strings.substring(p.name,0,1)}">P</span><strong th:text="${p.name}">Product</strong></div></td><td th:text="${p.sku}">SKU</td><td th:text="${'₹ ' + #numbers.formatDecimal(p.price,1,'COMMA',2,'POINT')}">₹0</td><td th:text="${p.gstRate + '%'}">0%</td><td><span th:class="${p.stock <= p.lowStockThreshold ? 'stock-badge' : 'stock-normal'}" th:text="${p.stock + ' units'}">0</span></td><td class="actions"><a class="button button-soft button-small" th:href="@{/products/{id}/edit(id=${p.id})}">Edit</a><form th:action="@{/products/{id}/delete(id=${p.id})}" method="post" onsubmit="return confirm('Delete this product?')"><button class="button button-danger button-small">Delete</button></form></td></tr>
+        <tr th:if="${#lists.isEmpty(products)}"><td colspan="6" class="empty-state">No products yet. Add your first product to start billing.</td></tr>
+    </tbody></table></div></section>
+</section>
+</th:block>
+</body>
+</html>

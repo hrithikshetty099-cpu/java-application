@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="layout(title, active, content)" class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" th:href="@{/}"><span class="brand-mark">D</span><span>Daily<span class="brand-light">Sales</span><small>GST MANAGEMENT</small></span></a>
+        <div class="nav-label">WORKSPACE</div>
+        <a class="nav-link" th:classappend="${active == 'dashboard'} ? 'active'" th:href="@{/}"><span>▦</span> Dashboard</a>
+        <a class="nav-link" th:classappend="${active == 'billing'} ? 'active'" th:href="@{/billing}"><span>＋</span> Create bill</a>
+        <a class="nav-link" th:classappend="${active == 'invoices'} ? 'active'" th:href="@{/invoices}"><span>▤</span> Invoices</a>
+        <div class="nav-label">MANAGE</div>
+        <a class="nav-link" th:classappend="${active == 'products'} ? 'active'" th:href="@{/products}"><span>◫</span> Products &amp; stock</a>
+        <a class="nav-link" th:classappend="${active == 'customers'} ? 'active'" th:href="@{/customers}"><span>♙</span> Customers</a>
+        <a class="nav-link" th:classappend="${active == 'reports'} ? 'active'" th:href="@{/reports}"><span>▥</span> Sales reports</a>
+        <div class="sidebar-bottom">
+            <div class="profile-avatar">A</div><div class="profile-copy"><strong sec:authentication="name">Admin</strong><small>Administrator</small></div>
+            <form th:action="@{/logout}" method="post"><button class="icon-button" title="Sign out" aria-label="Sign out">↗</button></form>
+        </div>
+    </aside>
+    <div class="main-area">
+        <header class="topbar"><button class="mobile-menu" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Toggle navigation">☰</button>
+            <div><div class="eyebrow">DAILY SALES MANAGEMENT</div><h1 th:text="${title}">Dashboard</h1></div>
+            <div class="topbar-right"><span class="status-dot"></span><span>Business is open</span><span class="top-date" th:text="${#temporals.format(#temporals.createNow(), 'EEE, dd MMM yyyy')}">Today</span></div>
+        </header>
+        <main class="page-content container-fluid"><div th:replace="${content}"></div></main>
+        <footer class="footer">DailySales <span>·</span> Business overview and GST billing</footer>
+    </div>
+</div>
+</body>
+</html>
